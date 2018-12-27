@@ -1,0 +1,1 @@
+hibernate 2nd level cache .alışmadığı durumları yazabilirsin
