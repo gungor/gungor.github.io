@@ -4,7 +4,7 @@ title:  "Check Process Status Using Parameters in Linux"
 date:   2019-01-18 13:24:26 +0300
 categories: article
 ---
-Whe you have a lot of processes running in your machine, you often check your if application running using ps command in linux for example (java processes)
+When you have a lot of processes running in your machine, you often check your if application running using ps command in linux for example (java processes)
 {% highlight perl %}
 ps aux | grep java
 {% endhighlight %}
