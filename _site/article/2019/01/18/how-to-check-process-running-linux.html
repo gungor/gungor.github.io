@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <title>Check Process Status Using Parameters in Linux</title>
+  <meta name="description" content="When you have a lot of processes running in your machine, you often check your if application running using ps command in linux for example (java processes)p...">
+
+  
+  
+  <link rel="stylesheet" href="http://localhost:4000/assets/style.css">
+
+  <link rel="canonical" href="http://localhost:4000/article/2019/01/18/how-to-check-process-running-linux.html">
+  <link rel="alternate" type="application/rss+xml" title="Developer Discoveries" href="http://localhost:4000/feed.xml">
+
+  <script async defer src="https://buttons.github.io/buttons.js"></script>
+  
+   (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+ (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+ m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+ })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+ ga('create', '', 'auto');
+ ga('send', 'pageview');
+</head>
+
+
+  <body>
+
+    <header class="border-bottom-thick px-2 clearfix">
+  <div class="left sm-width-full py-1 mt-1 mt-lg-0">
+    <a class="align-middle link-primary text-accent" href="/">
+      Developer Discoveries
+    </a>
+  </div>
+  <div class="right sm-width-full">
+    <ul class="list-reset mt-lg-1 mb-2 mb-lg-1">
+      
+        
+      
+        
+        <li class="inline-block">
+          <a class="align-middle link-primary mr-2 mr-lg-0 ml-lg-2" href="/about/">
+            About
+          </a>
+        </li>
+        
+      
+        
+      
+        
+      
+        
+      
+    </ul>
+  </div>
+</header>
+
+
+    <div>
+      <article class="container px-2 mx-auto mb4" itemscope itemtype="http://schema.org/BlogPosting">
+  <h3 class="h3 col-9 sm-width-full py-4 mt-3 inline-block" itemprop="name headline">Check Process Status Using Parameters in Linux</h3>
+  <div class="col-4 sm-width-full mt-1 border-top-thin ">
+    <p class="mb-3 py-2 bold h4"><time datetime="2019-01-18T13:24:26+03:00" itemprop="datePublished">Jan 18, 2019</time></p>
+  </div>
+
+  <div class="prose" itemprop="articleBody">
+      <p>When you have a lot of processes running in your machine, you often check your if application running using ps command in linux for example (java processes)</p>
+
+<figure class="highlight"><pre><code class="language-perl" data-lang="perl"><span class="nv">ps</span> <span class="nv">aux</span> <span class="o">|</span> <span class="nb">grep</span> <span class="nv">java</span></code></pre></figure>
+
+<p>That command outputs several running java processes on your linux machine. However it is still difficult to see if your application running, if you search certain parameters by your eye.
+Below is a sample bash script that helps you to find if your application running by checking parameters.</p>
+
+<figure class="highlight"><pre><code class="language-perl" data-lang="perl"><span class="c1">#!/usr/bin/bash</span>
+<span class="nv">echo</span> <span class="p">"</span><span class="s2">Checking application</span><span class="p">"</span>
+
+<span class="nv">TEMP_RESULT_FILE</span><span class="o">=</span><span class="sr">/etc/</span><span class="nv">temp_$$_result</span>
+
+<span class="nv">check_app_pid</span><span class="p">(){</span>
+<span class="nv">ps</span> <span class="nv">aux</span> <span class="o">|</span> <span class="nb">grep</span> <span class="nv">java</span> <span class="o">|</span> <span class="nb">grep</span> <span class="o">-</span><span class="nv">v</span> <span class="nb">grep</span> <span class="o">|</span> <span class="nv">awk</span> <span class="p">'</span><span class="s1">{print$2}</span><span class="p">'</span> <span class="o">|</span> <span class="k">while</span> <span class="nb">read</span> <span class="nv">pid</span> 
+<span class="k">do</span>
+	<span class="nv">ps</span> <span class="o">-</span><span class="nv">fp</span> <span class="nv">$pid</span> <span class="o">&gt;</span> <span class="nv">$</span><span class="p">{</span><span class="nv">TEMP_RESULT_FILE</span><span class="p">}</span> 
+	<span class="k">if</span> <span class="p">[</span> <span class="o">-</span><span class="nv">n</span> <span class="p">"</span><span class="s2">`grep </span><span class="si">${</span><span class="err">1</span><span class="si">}</span><span class="s2"> </span><span class="si">${TEMP_RESULT_FILE}</span><span class="s2">`</span><span class="p">"</span> <span class="p">];</span> <span class="k">then</span>
+		<span class="nv">echo</span> <span class="nv">$pid</span> <span class="o">&gt;</span> <span class="nv">$</span><span class="p">{</span><span class="nv">TEMP_RESULT_FILE</span><span class="p">}</span> 
+		<span class="k">return</span> <span class="mi">1</span>
+	<span class="nv">fi</span>
+<span class="nv">done</span>
+<span class="p">}</span>
+
+<span class="nv">running_result</span><span class="p">(){</span>
+	<span class="nv">echo</span> <span class="p">"</span><span class="si">${</span><span class="err">1</span><span class="si">}</span><span class="s2"> running with pid=$(cat </span><span class="si">${TEMP_RESULT_FILE}</span><span class="s2">)</span><span class="p">"</span>
+<span class="p">}</span>
+
+<span class="nv">not_running_result</span><span class="p">(){</span>
+	<span class="nv">echo</span> <span class="p">"</span><span class="si">${</span><span class="err">1</span><span class="si">}</span><span class="s2"> not running.</span><span class="p">"</span>
+<span class="p">}</span>
+
+<span class="nv">check_node</span><span class="p">(){</span>
+	<span class="nv">result</span><span class="o">=</span><span class="nv">$</span><span class="err">(</span><span class="nv">check_app_pid</span> <span class="nv">$</span><span class="p">{</span><span class="mi">1</span><span class="p">})</span>
+	<span class="k">if</span> <span class="p">[[</span> <span class="vg">$?</span> <span class="o">-</span><span class="ow">eq</span> <span class="mi">1</span> <span class="p">]];</span> <span class="k">then</span>
+		<span class="nv">running_result</span> <span class="nv">$</span><span class="p">{</span><span class="mi">2</span><span class="p">}</span>
+	<span class="k">else</span>
+		<span class="nv">not_running_result</span> <span class="nv">$</span><span class="p">{</span><span class="mi">2</span><span class="p">}</span> 
+	<span class="nv">fi</span>
+<span class="p">}</span>
+
+<span class="nv">check_node</span> <span class="nv">karaf</span><span class="o">.</span><span class="nv">home</span><span class="o">=</span><span class="sr">/u01/</span><span class="nv">test</span> <span class="nv">TEST_APP</span>
+<span class="nv">check_node</span> <span class="nv">config</span><span class="o">.</span><span class="nv">dir</span><span class="o">=</span><span class="sr">/u01/</span><span class="nv">test</span><span class="sr">/etc/</span><span class="nv">test1</span> <span class="nv">TEST1</span>
+<span class="nv">check_node</span> <span class="nv">config</span><span class="o">.</span><span class="nv">dir</span><span class="o">=</span><span class="sr">/u01/</span><span class="nv">test</span><span class="sr">/etc/</span><span class="nv">test2</span> <span class="nv">TEST2</span>
+ 
+<span class="nv">rm</span> <span class="o">-</span><span class="nv">rf</span> <span class="nv">$</span><span class="p">{</span><span class="nv">TEMP_RESULT_FILE</span><span class="p">}</span> </code></pre></figure>
+
+<p>After you run this script, it shows an output like</p>
+
+<figure class="highlight"><pre><code class="language-perl" data-lang="perl"><span class="nv">TEST_APP</span> <span class="nv">running</span> <span class="nv">with</span> <span class="nv">pid</span><span class="o">=</span><span class="mi">77495</span>
+<span class="nv">TEST1</span> <span class="nv">running</span> <span class="nv">with</span> <span class="nv">pid</span><span class="o">=</span><span class="mi">861</span>
+<span class="nv">TEST2</span> <span class="nv">running</span> <span class="nv">with</span> <span class="nv">pid</span><span class="o">=</span><span class="mi">891</span></code></pre></figure>
+
+  </div>
+
+</article>
+
+<div class="container mx-auto px-2 py-2 clearfix">
+  <!-- Use if you want to show previous and next for all posts. -->
+
+
+
+  <div class="col-4 sm-width-full left mr-lg-4 mt-3">
+    <a class="no-underline border-top-thin py-1 block" href="http://localhost:4000/article/2018/12/19/arquillian-not-bringing-anything.html">
+      <span class="h5 bold text-accent">Previous</span>
+      <p class="bold h3 link-primary mb-1">Arquillian brings nothing new</p>
+      <p>Arquillian is a test-framework that helps you to run JUnit tests (or any other test frameworks) on remote Test or...</p>
+    </a>
+  </div>
+  
+  
+  <div class="col-4 sm-width-full left mt-3">
+    <a class="no-underline border-top-thin py-1 block" href="http://localhost:4000/article/2020/08/08/spring-webclient-where-is-subscriber.html">
+      <span class="h5 bold text-accent">Next</span>
+      <p class="bold h3 link-primary mb-1">Using Spring Reactive WebClient instead of RestTemplate</p>
+      <p>In the age of where resources are cheap, applications running on Prod environment still have resource problems (CPU, Memory). Threads...</p>
+    </a>
+  </div>
+
+
+</div>
+
+    </div>
+
+    <div class="border-top-thin clearfix mt-2 mt-lg-4">
+  <div class="container mx-auto px-2">
+    <p class="col-8 sm-width-full left py-2 mb-0">This project is maintained by <a class="text-accent" href="https://github.com/gungor">gungor</a></p>
+    <ul class="list-reset right clearfix sm-width-full py-2 mb-2 mb-lg-0">
+      <li class="inline-block mr-1">
+        <a href="https://twitter.com/share" class="twitter-share-button" data-hashtags="Developer Discoveries">Tweet</a> <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');</script>
+      </li>
+      <li class="inline-block">
+        <a class="github-button" href="https://github.com/gungor/" data-icon="octicon-star" data-count-href="gungor//stargazers" data-count-api="/repos/gungor/#stargazers_count" data-count-aria-label="# stargazers on GitHub" aria-label="Star gungor/ on GitHub">Star</a>
+      </li>
+    </ul>
+  </div>
+</div>
+
+
+  </body>
+
+</html>

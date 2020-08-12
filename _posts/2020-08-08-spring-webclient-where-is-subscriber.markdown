@@ -14,7 +14,7 @@ HttpEntity<Request> request = new HttpEntity<>(new Request("test"));
 restTemplate.postForObject("http://localhost:8080/testService", request, Request.class);
 {% endhighlight %}
 
-If RestTemplate called in a separate thread, you will need to wait for this Threads to complete as much as RestTemplate receives a response from IO operation.
+If RestTemplate called in a separate thread, you will need to wait for this thread to complete as long as RestTemplate receives a response from IO operation.
 Consider that, you need to call 1000 times an HTTP service concurrently. You need 1000 Threads to run and wait for its RestTemplate blocking call.
 It will degrade significantly performance of your application.
 
@@ -31,11 +31,11 @@ HttpEntity<Request> request = new HttpEntity<>(new Request("test"));
                 .exchange()
                 .doOnSuccess( (ClientResponse clientResponse) -> {
                     // response can be processed here asynchronously
-					// one of reactor-http-nio handles this block
+		    // one of reactor-http-nio handles this block
                 })
                 .doOnError( (Throwable error) -> {
                     // error can be processed here asynchronously
-					// one of reactor-http-nio handles this block
+		    // one of reactor-http-nio handles this block
                 })
                 .subscribe();
 {% endhighlight %}
