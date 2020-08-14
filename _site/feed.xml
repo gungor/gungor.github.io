@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.8.7">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" /><updated>2020-08-13T19:50:44+03:00</updated><id>http://localhost:4000/feed.xml</id><title type="html">Developer Discoveries</title><subtitle></subtitle><entry><title type="html">Using Spring Reactive WebClient instead of RestTemplate</title><link href="http://localhost:4000/article/2020/08/08/spring-webclient-where-is-subscriber.html" rel="alternate" type="text/html" title="Using Spring Reactive WebClient instead of RestTemplate" /><published>2020-08-08T14:02:13+03:00</published><updated>2020-08-08T14:02:13+03:00</updated><id>http://localhost:4000/article/2020/08/08/spring-webclient-where-is-subscriber</id><content type="html" xml:base="http://localhost:4000/article/2020/08/08/spring-webclient-where-is-subscriber.html">&lt;p&gt;In the age of where resources are cheap, applications running on Prod environment still have resource problems (CPU, Memory). Threads were being used for parallel processing
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.8.7">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" /><updated>2020-08-14T17:45:53+03:00</updated><id>http://localhost:4000/feed.xml</id><title type="html">Developer Discoveries</title><subtitle></subtitle><entry><title type="html">Performance advantages of Spring Reactive WebClient over RestTemplate</title><link href="http://localhost:4000/article/2020/08/08/spring-webclient-performance-advantages.html" rel="alternate" type="text/html" title="Performance advantages of Spring Reactive WebClient over RestTemplate" /><published>2020-08-08T14:02:13+03:00</published><updated>2020-08-08T14:02:13+03:00</updated><id>http://localhost:4000/article/2020/08/08/spring-webclient-performance-advantages</id><content type="html" xml:base="http://localhost:4000/article/2020/08/08/spring-webclient-performance-advantages.html">&lt;p&gt;In the age of where resources are cheap, applications running on Prod environment still have resource problems (CPU, Memory). Threads were being used for parallel processing
 and are useful. However when they are used inefficiently, it still causes resource problem.&lt;/p&gt;
 
 &lt;p&gt;An example is when you call a webservice. As you wait for the response, your thread is blocked.&lt;/p&gt;
@@ -17,10 +17,10 @@ handle IO operations.&lt;/p&gt;
 
 &lt;p&gt;As it is shown below, if webclient is used reactor-http-nio threads are created as many as the number of cpus in your machine. 
 If you have 4 cores, 4 io.netty.channel.nio.NioEventLoop instances and 4 reactor-http-nio threads are created and their number remain fixed even if concurrent WebClient calls increase.
-You can see threads reactor-http-nio threads in VisualVM.&lt;/p&gt;
+You can see reactor-http-nio threads in VisualVM.&lt;/p&gt;
 
 &lt;p&gt;&lt;img src=&quot;/assets/reactor-nio-threads.PNG&quot; alt=&quot;Reactor nio threads&quot; /&gt;
-&lt;br /&gt;&lt;br /&gt;&lt;br /&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;br /&gt;&lt;br /&gt;&lt;br /&gt;&lt;/p&gt;
 
 &lt;p&gt;Here, Netty is used in Spring Reactor. Netty is responsible for handling non blocking http calls. There also alternatives such as Jetty, Undertow, vs.
 Success and error callbacks are handled in reactor-http-nio threads.&lt;/p&gt;

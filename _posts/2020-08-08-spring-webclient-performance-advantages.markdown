@@ -1,6 +1,6 @@
 ---
 layout: post
-title:  "Using Spring Reactive WebClient instead of RestTemplate"
+title:  "Performance advantages of Spring Reactive WebClient over RestTemplate"
 date:   2020-08-08 14:02:13 +0300
 categories: article
 ---
@@ -24,10 +24,10 @@ handle IO operations.
 
 As it is shown below, if webclient is used reactor-http-nio threads are created as many as the number of cpus in your machine. 
 If you have 4 cores, 4 io.netty.channel.nio.NioEventLoop instances and 4 reactor-http-nio threads are created and their number remain fixed even if concurrent WebClient calls increase.
-You can see threads reactor-http-nio threads in VisualVM.
+You can see reactor-http-nio threads in VisualVM.
 
 ![Reactor nio threads](/assets/reactor-nio-threads.PNG)
-<br/><br/><br/><br/>
+<br/><br/><br/>
 
 
 Here, Netty is used in Spring Reactor. Netty is responsible for handling non blocking http calls. There also alternatives such as Jetty, Undertow, vs.
