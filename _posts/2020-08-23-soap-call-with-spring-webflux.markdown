@@ -83,7 +83,7 @@ Jaxb2SoapEncoder class must be added to WebClient config as below.
     }
 {% endhighlight %}
 
-When calling WebClient retrieve used instead of post since error handling is better using retrieve. If no HTTP status error occurred,
+When calling WebClient retrieve used instead of exchange since error handling is better using retrieve. If no HTTP status error occurred,
 response is mapped to GetCountryResponse.
 
 {% highlight java %}
