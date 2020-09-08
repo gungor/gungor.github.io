@@ -1,4 +1,84 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.8.7">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" /><updated>2020-08-23T21:06:28+03:00</updated><id>http://localhost:4000/feed.xml</id><title type="html">Developer Discoveries</title><subtitle></subtitle><entry><title type="html">Soap call with Spring WebFlux</title><link href="http://localhost:4000/article/2020/08/23/soap-call-with-spring-webflux.html" rel="alternate" type="text/html" title="Soap call with Spring WebFlux" /><published>2020-08-23T19:56:47+03:00</published><updated>2020-08-23T19:56:47+03:00</updated><id>http://localhost:4000/article/2020/08/23/soap-call-with-spring-webflux</id><content type="html" xml:base="http://localhost:4000/article/2020/08/23/soap-call-with-spring-webflux.html">&lt;p&gt;As reactive becoming more used by developers in order to get performance advantages, you will still need to deal with legacy systems.
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.8.7">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" /><updated>2020-09-08T18:16:25+03:00</updated><id>http://localhost:4000/feed.xml</id><title type="html">Developer Discoveries</title><subtitle></subtitle><entry><title type="html">Building custom Openshift S2I Builder image with Java 11,13,14</title><link href="http://localhost:4000/article/2020/09/08/custom-s2i-builderimage-several-jvm.html" rel="alternate" type="text/html" title="Building custom Openshift S2I Builder image with Java 11,13,14" /><published>2020-09-08T03:56:47+03:00</published><updated>2020-09-08T03:56:47+03:00</updated><id>http://localhost:4000/article/2020/09/08/custom-s2i-builderimage-several-jvm</id><content type="html" xml:base="http://localhost:4000/article/2020/09/08/custom-s2i-builderimage-several-jvm.html">&lt;p&gt;In the age of containers and Kubernetes, applications needed to be configured with Dockerfiles and YAMLs. That can be another workload for developers and devops.
+Openshift provide a tool known as source-to-image (S2I) in order to simplify image creation from application sources. No additional configuration files are needed in this process.
+It takes application source and produces a runnable app in Openshift image registry or in external image registry. Then runs this image in a container. Let’s have a look at the command below.&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-shell&quot; data-lang=&quot;shell&quot;&gt;oc new-app https://github.com/gungor/s2i-springboot-sample.git &lt;span class=&quot;nt&quot;&gt;-i&lt;/span&gt; openjdk-11-rhel7&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;Assuming openjdk-11-rhel7 exists in your Openshift image registry, which can be pulled from Redhat Container Catalog (https://catalog.redhat.com), 
+this command tells Openshift to take application source from git repository and use openjdk-11-rhel7 as builder image to produce application image and other resources such as deploymentconfig,
+buildconfig and service.&lt;/p&gt;
+
+&lt;p&gt;We used openjdk-11-rhel7 here. What if Java 13,14 needed? What if OpenJ9 needed due to memory limits? You may not find the exact image you need in Redhat Container Catalog.
+Then you can produce your own builder image.&lt;/p&gt;
+
+&lt;p&gt;S2I builder images have assemble and run scripts. These scripts are must for a builder image. I will show how a custom builder image is built.&lt;/p&gt;
+
+&lt;p&gt;&lt;br /&gt;&lt;b&gt;assemble&lt;/b&gt;&lt;/p&gt;
+
+&lt;p&gt;Following git clone,
+build pod runs sti-build container&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;pulls image openjdk-11-rhel7 then runs a container (if incremetal build is specified, pulls application image build from openjdk-11-rhel7 )&lt;/li&gt;
+  &lt;li&gt;application source was cloned with init container and assemble script runs /usr/local/s2i/assemble to compile, build and package your application.&lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;commits new application image (s2i-springboot-sample-1) to image registry&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;if incremental build is used maven artifacts are extracted from previous image and those are not downloaded again. Thus you save build time.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;&lt;br /&gt;&lt;b&gt;run&lt;/b&gt;&lt;/p&gt;
+
+&lt;p&gt;application image runs in a pod and runs script /usr/local/s2i/run&lt;/p&gt;
+
+&lt;p&gt;&lt;br /&gt;&lt;b&gt;Building custom builder image&lt;/b&gt;&lt;/p&gt;
+
+&lt;p&gt;This guilde is to show you how you make changes in a builder image: &lt;a class=&quot;text-accent&quot; href=&quot;https://github.com/gungor/s2i-builder-image&quot;&gt;https://github.com/gungor/s2i-builder-image&lt;/a&gt; .
+You can also setup any environment for any programming language. 
+I used OpenJDK 14 with OpenJ9 and maven 3.6.3. 
+Openshift &lt;a class=&quot;text-accent&quot; href=&quot;https://github.com/jboss-openshift/cct_module&quot;&gt;https://github.com/jboss-openshift/cct_module&lt;/a&gt; has many scripts helping builder image. assemble, run, save-artifacts files and configuration files can be found there.
+I made minimum changes to referencing openjdk-11-rhel7 image. Because several configuration files exists in cct_module and they use Openshift specific environment variables.
+Jvm start parameters adjusted by scripts in cct_module.
+Keeping them is useful. Dockerfile can be simplified though, since it contains several redundant files.&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-shell&quot; data-lang=&quot;shell&quot;&gt;&lt;span class=&quot;c&quot;&gt;# install maven&lt;/span&gt;
+RUN &lt;span class=&quot;nb&quot;&gt;mkdir&lt;/span&gt; /tmp/tools &lt;span class=&quot;o&quot;&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span class=&quot;se&quot;&gt;\&lt;/span&gt;
+	curl &lt;span class=&quot;nt&quot;&gt;-o&lt;/span&gt; /tmp/tools/apache-maven-3.6.3-bin.tar.gz  &lt;span class=&quot;nt&quot;&gt;-L&lt;/span&gt; maven_download_url &lt;span class=&quot;o&quot;&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span class=&quot;se&quot;&gt;\ &lt;/span&gt;
+	&lt;span class=&quot;nb&quot;&gt;tar&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;-zxvf&lt;/span&gt; /tmp/tools/apache-maven-3.6.3-bin.tar.gz &lt;span class=&quot;nt&quot;&gt;-C&lt;/span&gt; /tmp/tools &lt;span class=&quot;o&quot;&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span class=&quot;se&quot;&gt;\ &lt;/span&gt;
+	&lt;span class=&quot;nb&quot;&gt;mkdir&lt;/span&gt; /usr/lib/maven &lt;span class=&quot;o&quot;&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span class=&quot;se&quot;&gt;\ &lt;/span&gt;
+	&lt;span class=&quot;nb&quot;&gt;mv&lt;/span&gt; /tmp/tools/apache-maven-3.6.3/&lt;span class=&quot;k&quot;&gt;*&lt;/span&gt; /usr/lib/maven &lt;span class=&quot;o&quot;&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span class=&quot;se&quot;&gt;\ &lt;/span&gt;
+	&lt;span class=&quot;nb&quot;&gt;rm&lt;/span&gt; /tmp/tools/apache-maven-3.6.3-bin.tar.gz
+ENV &lt;span class=&quot;nv&quot;&gt;PATH&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;/usr/lib/maven/bin:&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;${&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;PATH&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;
+
+&lt;span class=&quot;c&quot;&gt;# install java&lt;/span&gt;
+&lt;span class=&quot;c&quot;&gt;# openj9 java:14&lt;/span&gt;
+RUN curl &lt;span class=&quot;nt&quot;&gt;-o&lt;/span&gt; /tmp/tools/jdk.tar.gz &lt;span class=&quot;nt&quot;&gt;-L&lt;/span&gt; jdk_download_url &lt;span class=&quot;o&quot;&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span class=&quot;se&quot;&gt;\ &lt;/span&gt;
+	&lt;span class=&quot;nb&quot;&gt;tar&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;-zxvf&lt;/span&gt; /tmp/tools/jdk.tar.gz &lt;span class=&quot;nt&quot;&gt;-C&lt;/span&gt; /tmp/tools &lt;span class=&quot;o&quot;&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span class=&quot;se&quot;&gt;\ &lt;/span&gt;
+	&lt;span class=&quot;nb&quot;&gt;mkdir&lt;/span&gt; /usr/lib/jvm &lt;span class=&quot;o&quot;&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span class=&quot;se&quot;&gt;\ &lt;/span&gt;
+	&lt;span class=&quot;nb&quot;&gt;mv&lt;/span&gt; /tmp/tools/jdk-14.0.2+12/&lt;span class=&quot;k&quot;&gt;*&lt;/span&gt; /usr/lib/jvm &lt;span class=&quot;o&quot;&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span class=&quot;se&quot;&gt;\ &lt;/span&gt;
+	&lt;span class=&quot;nb&quot;&gt;rm&lt;/span&gt; /tmp/tools/jdk.tar.gz
+	
+ENV &lt;span class=&quot;nv&quot;&gt;PATH&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;/usr/lib/jvm/bin:&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;${&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;PATH&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;
+ENV &lt;span class=&quot;nv&quot;&gt;JAVA_HOME&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;/usr/lib/jvm&quot;&lt;/span&gt; &lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;Changes I made&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;maven setup&lt;/li&gt;
+  &lt;li&gt;jdk setup&lt;/li&gt;
+  &lt;li&gt;changes to run script (enable-maven command discarded)&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;&lt;br /&gt;&lt;b&gt;Minimum requirements for Builder Image&lt;/b&gt;&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;new user configuration. Can be seen here: https://github.com/jboss-openshift/cct_module/blob/master/jboss/container/user/configure.sh&lt;/li&gt;
+  &lt;li&gt;assemble script in /usr/local/s2i&lt;/li&gt;
+  &lt;li&gt;run script in /usr/local/s2i&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;&lt;br /&gt;&lt;br /&gt;&lt;a class=&quot;text-accent&quot; href=&quot;https://github.com/gungor/s2i-builder-image&quot;&gt;https://github.com/gungor/s2i-builder-image&lt;/a&gt;&lt;br /&gt;
+Run build.sh, then you have a builder image in your docker registry. You can customize maven and jdk version in Dockerfile.&lt;/p&gt;
+
+&lt;p&gt;This guide is to just give you an idea about how builder images work and produced. Production usage of this image is not recommended.&lt;/p&gt;</content><author><name></name></author><category term="article" /><summary type="html">In the age of containers and Kubernetes, applications needed to be configured with Dockerfiles and YAMLs. That can be another workload for developers and devops. Openshift provide a tool known as source-to-image (S2I) in order to simplify image creation from application sources. No additional configuration files are needed in this process. It takes application source and produces a runnable app in Openshift image registry or in external image registry. Then runs this image in a container. Let’s have a look at the command below.</summary></entry><entry><title type="html">Soap call with Spring WebFlux</title><link href="http://localhost:4000/article/2020/08/23/soap-call-with-spring-webflux.html" rel="alternate" type="text/html" title="Soap call with Spring WebFlux" /><published>2020-08-23T19:56:47+03:00</published><updated>2020-08-23T19:56:47+03:00</updated><id>http://localhost:4000/article/2020/08/23/soap-call-with-spring-webflux</id><content type="html" xml:base="http://localhost:4000/article/2020/08/23/soap-call-with-spring-webflux.html">&lt;p&gt;As reactive becoming more used by developers in order to get performance advantages, you will still need to deal with legacy systems.
 There are still many soap web services being used today. If you want to consume soap services with Spring Reactor WebFlux, here is the example.
 &lt;a class=&quot;text-accent&quot; href=&quot;https://github.com/gungor/spring-webclient-soap.git&quot;&gt;https://github.com/gungor/spring-webclient-soap.git&lt;/a&gt;&lt;/p&gt;
 
@@ -73,8 +153,8 @@ from the JAXB object. JAXB classes are generated by jaxb2-maven-plugin of org.co
         &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;webClient&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;;&lt;/span&gt;
     &lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
 
-&lt;p&gt;When calling WebClient retrieve used instead of post since error handling is better using retrieve. If no HTTP status error occurred,
-response is mapped to GetCountryResponse.&lt;/p&gt;
+&lt;p&gt;When calling WebClient retrieve used instead of exchange since error handling is better using retrieve. If no HTTP status error occurred,
+response is mapped to JAXB Response.&lt;/p&gt;
 
 &lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-java&quot; data-lang=&quot;java&quot;&gt; &lt;span class=&quot;kd&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;call&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nc&quot;&gt;GetCountryRequest&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;getCountryRequest&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;kd&quot;&gt;throws&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;SOAPException&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;ParserConfigurationException&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;IOException&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
 
