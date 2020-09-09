@@ -27,7 +27,7 @@ S2I builder images have assemble and run scripts. These scripts are must for a b
 Following git clone,
 build pod runs sti-build container
 
-- pulls image openjdk-11-rhel7 then runs a container (if incremetal build is specified, pulls application image build from openjdk-11-rhel7 )
+- pulls image openjdk-11-rhel7 then runs a container (if incremental build is specified, pulls application image which was built from openjdk-11-rhel7 )
 - application source was cloned with init container and assemble script runs /usr/local/s2i/assemble to compile, build and package your application. 
 - commits new application image (s2i-springboot-sample-1) to image registry 
 
@@ -44,9 +44,9 @@ application image runs in a pod and runs script /usr/local/s2i/run
 This guilde is to show you how you make changes in a builder image: <a class="text-accent" href="https://github.com/gungor/s2i-builder-image">https://github.com/gungor/s2i-builder-image</a> .
 You can also setup any environment for any programming language. 
 I used OpenJDK 14 with OpenJ9 and maven 3.6.3. 
-Openshift <a class="text-accent" href="https://github.com/jboss-openshift/cct_module">https://github.com/jboss-openshift/cct_module</a> has many scripts helping builder image. assemble, run, save-artifacts files and configuration files can be found there.
-I made minimum changes to referencing openjdk-11-rhel7 image. Because several configuration files exists in cct_module and they use Openshift specific environment variables.
-Jvm start parameters adjusted by scripts in cct_module.
+Openshift <a class="text-accent" href="https://github.com/jboss-openshift/cct_module">cct_module</a> has many scripts helping builder image. assemble, run, save-artifacts files and configuration files can be found there.
+I made minimum changes referencing openjdk-11-rhel7 image. Because several configuration files exists in cct_module and they use Openshift specific environment variables.
+Jvm start parameters adjusted by additional scripts in cct_module.
 Keeping them is useful. Dockerfile can be simplified though, since it contains several redundant files.
 
 {% highlight shell %}
@@ -71,13 +71,12 @@ ENV PATH="/usr/lib/jvm/bin:${PATH}"
 ENV JAVA_HOME="/usr/lib/jvm" 
 {% endhighlight %}
 
-Changes I made
+Changes I made seen above
 - maven setup
 - jdk setup
 - changes to run script (enable-maven command discarded)
 
 <br><b>Minimum requirements for Builder Image</b>
-- new user configuration. Can be seen here: https://github.com/jboss-openshift/cct_module/blob/master/jboss/container/user/configure.sh
 - assemble script in /usr/local/s2i
 - run script in /usr/local/s2i
 
