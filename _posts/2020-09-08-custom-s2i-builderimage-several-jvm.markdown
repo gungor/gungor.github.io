@@ -74,14 +74,13 @@ ENV JAVA_HOME="/usr/lib/jvm"
 Changes I made seen above
 - maven setup
 - jdk setup
-- changes to run script (enable-maven command discarded)
 
 <br><b>Minimum requirements for Builder Image</b>
 - assemble script in /usr/local/s2i
 - run script in /usr/local/s2i
 
 <br><br><a class="text-accent" href="https://github.com/gungor/s2i-builder-image">https://github.com/gungor/s2i-builder-image</a><br>
-Run build.sh, then you have a builder image in your docker registry. You can customize maven and jdk version in Dockerfile.  
+Run <a class="text-accent" href="https://github.com/gungor/s2i-builder-image/blob/master/build.sh">build.sh</a>, then you have a builder image in your docker registry. You can customize maven and jdk version in Dockerfile.  
 
 This guide is to just give you an idea about how builder images work and produced. Production usage of this image is not recommended.
 
