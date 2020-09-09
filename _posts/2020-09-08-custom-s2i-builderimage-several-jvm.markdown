@@ -79,7 +79,7 @@ Changes I made seen above
 - assemble script in /usr/local/s2i
 - run script in /usr/local/s2i
 
-<br><br><a class="text-accent" href="https://github.com/gungor/s2i-builder-image">https://github.com/gungor/s2i-builder-image</a><br>
+Dockerfile and all scripts are here: <br><br><a class="text-accent" href="https://github.com/gungor/s2i-builder-image">https://github.com/gungor/s2i-builder-image</a><br><br>
 Run <a class="text-accent" href="https://github.com/gungor/s2i-builder-image/blob/master/build.sh">build.sh</a>, then you have a builder image in your docker registry. You can customize maven and jdk version in Dockerfile.  
 
 This guide is to just give you an idea about how builder images work and produced. Production usage of this image is not recommended.
