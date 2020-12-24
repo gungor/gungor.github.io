@@ -56,7 +56,47 @@ private Flux<DataBuffer> encode(Object value ,
     }
 {% endhighlight %}
 
-Jaxb2SoapEncoder class must be added to WebClient config as below.
+With Jaxb2SoapEncoder, we can handle how request is sent through webflux.
+
+{% highlight java %}
+@Override
+    @SuppressWarnings({"rawtypes", "unchecked", "cast"})  // XMLEventReader is Iterator<Object> on JDK 9
+    public Object decode(DataBuffer dataBuffer, ResolvableType targetType,
+                         @Nullable MimeType mimeType, @Nullable Map<String, Object> hints) throws DecodingException {
+
+        try {
+            DefaultStrategiesHelper helper = new DefaultStrategiesHelper(WebServiceTemplate.class);
+            WebServiceMessageFactory messageFactory = helper.getDefaultStrategy(WebServiceMessageFactory.class);
+            WebServiceMessage message = messageFactory.createWebServiceMessage( dataBuffer.asInputStream() );
+            return unmarshal(message, targetType.toClass());
+        }
+        catch (Throwable ex) {
+            ex = (ex.getCause() instanceof XMLStreamException ? ex.getCause() : ex);
+            throw Exceptions.propagate(ex);
+        }
+        finally {
+            DataBufferUtils.release(dataBuffer);
+        }
+    }
+
+    private Object unmarshal(WebServiceMessage message, Class<?> outputClass) {
+        try {
+            Unmarshaller unmarshaller = initUnmarshaller(outputClass);
+            JAXBElement<?> jaxbElement = unmarshaller.unmarshal(message.getPayloadSource(),outputClass);
+            return jaxbElement.getValue();
+        }
+        catch (UnmarshalException ex) {
+            throw new DecodingException("Could not unmarshal XML to " + outputClass, ex);
+        }
+        catch (JAXBException ex) {
+            throw new CodecException("Invalid JAXB configuration", ex);
+        }
+    }
+{% endhighlight %}
+
+Jaxb2SoapDecoder helps in casting to expected object from before it returns to webflux.
+
+Jaxb2SoapEncoder and Jaxb2SoapDecoder classes must be added to WebClient config as below.
 
 {% highlight java %}
     @Bean
@@ -71,8 +111,10 @@ Jaxb2SoapEncoder class must be added to WebClient config as below.
                 });
 
         ExchangeStrategies exchangeStrategies = ExchangeStrategies.builder().codecs( clientCodecConfigurer -> {
-            clientCodecConfigurer.customCodecs().encoder(new Jaxb2SoapEncoder());
+            clientCodecConfigurer.customCodecs().register(new Jaxb2SoapEncoder());
+            clientCodecConfigurer.customCodecs().register(new Jaxb2SoapDecoder());
         }).build();
+
 
         WebClient webClient = WebClient.builder()
                 .clientConnector(new ReactorClientHttpConnector(HttpClient.from(tcpClient).wiretap(true)))
