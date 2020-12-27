@@ -1,4 +1,101 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.0.1">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" /><updated>2020-09-08T18:27:54+03:00</updated><id>http://localhost:4000/feed.xml</id><title type="html">Developer Discoveries</title><subtitle></subtitle><entry><title type="html">Building custom Openshift S2I Builder image with Java 11,13,14</title><link href="http://localhost:4000/article/2020/09/08/custom-s2i-builderimage-several-jvm.html" rel="alternate" type="text/html" title="Building custom Openshift S2I Builder image with Java 11,13,14" /><published>2020-09-08T03:56:47+03:00</published><updated>2020-09-08T03:56:47+03:00</updated><id>http://localhost:4000/article/2020/09/08/custom-s2i-builderimage-several-jvm</id><content type="html" xml:base="http://localhost:4000/article/2020/09/08/custom-s2i-builderimage-several-jvm.html">&lt;p&gt;In the age of containers and Kubernetes, applications needed to be configured with Dockerfiles and YAMLs. That can be another workload for developers and devops.
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.0.1">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" /><updated>2020-12-28T02:38:35+03:00</updated><id>http://localhost:4000/feed.xml</id><title type="html">Developer Discoveries</title><subtitle></subtitle><entry><title type="html">Configmap Reload with Spring Boot in Kubernetes</title><link href="http://localhost:4000/article/2020/12/28/springboot-k8s-configmap-reload.html" rel="alternate" type="text/html" title="Configmap Reload with Spring Boot in Kubernetes" /><published>2020-12-28T01:38:27+03:00</published><updated>2020-12-28T01:38:27+03:00</updated><id>http://localhost:4000/article/2020/12/28/springboot-k8s-configmap-reload</id><content type="html" xml:base="http://localhost:4000/article/2020/12/28/springboot-k8s-configmap-reload.html">&lt;p&gt;In Kubernetes, configmap is used for keeping properties for an application. Once Spring applications required restart just due to change in properties file to take effect.
+Now in cloud with the help of fabric8 Kubernetes client, restart is not required anymore. We can reflect changes in configuration to Spring Boot live without downtime.&lt;/p&gt;
+
+&lt;p&gt;There are two reload modes: polling and event. Polling as the name implies polls Kubernetes API periodically. Event is more effective since it takes effect when configmap changed. 
+We will cover event mode reload in this post.&lt;/p&gt;
+
+&lt;p&gt;How events arrive Spring Boot? Does Kubernetes aware of our Spring Boot app? No. Don’t confuse this event with Kubernetes event.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/configmap-diagram.png&quot; alt=&quot;configmap-diagram&quot; /&gt;
+&lt;br /&gt;&lt;/p&gt;
+
+&lt;p&gt;Above you can see Websocket is used between Spring Boot and Kubernetes API Server. Assuming we are using namespace “default” is this example, changes to response in this address reflected to KubernetesClient https://{api_server_clusterip}/api/v1/namespaces/default/configmaps/k8s-live-reload-configmap . 
+If kube-proxy does not allow WebSocket then API Server is polled by HttpClient.&lt;/p&gt;
+
+&lt;p&gt;In Spring side, bootstrap.yaml reload mode and configmap name given. I deliberately disabled actuator endpoints, because most examples include actuator endpoints, however it is not required because fabric8-client refreshes bean internally.
+In pom.xml however actuator dependencies needed since fabric8-config depends on actuator configuration classes.&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-yml&quot; data-lang=&quot;yml&quot;&gt;&lt;span class=&quot;na&quot;&gt;spring&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+  &lt;span class=&quot;na&quot;&gt;application&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;name&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;k8s-live-reload-example&lt;/span&gt;
+  &lt;span class=&quot;na&quot;&gt;cloud&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;kubernetes&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+      &lt;span class=&quot;na&quot;&gt;reload&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+        &lt;span class=&quot;na&quot;&gt;enabled&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;no&quot;&gt;true&lt;/span&gt;
+        &lt;span class=&quot;na&quot;&gt;mode&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;event&lt;/span&gt;
+      &lt;span class=&quot;na&quot;&gt;config&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+        &lt;span class=&quot;na&quot;&gt;sources&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+          &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;name&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;k8s-live-reload-configmap&lt;/span&gt;
+          
+&lt;span class=&quot;na&quot;&gt;management&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+  &lt;span class=&quot;na&quot;&gt;endpoints&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;enabled-by-default&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;no&quot;&gt;false&lt;/span&gt; &lt;span class=&quot;c1&quot;&gt;#actuator endpoints disabled in order to show it is not required to reload config&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;Beans annotated with @ConfigurationProperties are refreshed.&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-java&quot; data-lang=&quot;java&quot;&gt;&lt;span class=&quot;nd&quot;&gt;@Configuration&lt;/span&gt;
+&lt;span class=&quot;nd&quot;&gt;@ConfigurationProperties&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;prefix&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;bean&quot;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;nd&quot;&gt;@Data&lt;/span&gt;
+&lt;span class=&quot;kd&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;kd&quot;&gt;class&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;Config&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
+
+    &lt;span class=&quot;kd&quot;&gt;private&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;String&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;testvalue&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;;&lt;/span&gt;
+    
+&lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;&lt;br /&gt;&lt;b&gt;Run example&lt;/b&gt;&lt;br /&gt;
+We need to build and push our application image to Docker and Kubernetes need to see this image. I suggest using Minikube 1.16.0. There are problems in prior versions due to DNS and VM(Hyper-V, VirtualBox). This version allows to run minikube as a docker container.
+It can be download from here: &lt;a class=&quot;text-accent&quot; href=&quot;https://github.com/kubernetes/minikube/releases&quot;&gt;https://github.com/kubernetes/minikube/releases&lt;/a&gt; Assuming you are not behind proxy or VPN (you may have network problems), following installation start minikube with this command.
+You must have docker running.&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-shell&quot; data-lang=&quot;shell&quot;&gt;minikube start &lt;span class=&quot;nt&quot;&gt;--driver&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;docker&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;This will download images and start minikube. Then install kubectl: &lt;a class=&quot;text-accent&quot; href=&quot;https://kubernetes.io/docs/tasks/tools/install-kubectl&quot;&gt;https://kubernetes.io/docs/tasks/tools/install-kubectl&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;First we need rolebinding for querying API Server. Otherwise KubernetesClient cannot reach API Server. default is the namespace here.&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-shell&quot; data-lang=&quot;shell&quot;&gt;kubectl create rolebinding default-sa-view &lt;span class=&quot;nt&quot;&gt;--clusterrole&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;view &lt;span class=&quot;nt&quot;&gt;--serviceaccount&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;default:default &lt;span class=&quot;nt&quot;&gt;--namespace&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;default&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;Get example project&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-shell&quot; data-lang=&quot;shell&quot;&gt;git clone https://github.com/gungor/kubernetes-examples.git
+&lt;span class=&quot;nb&quot;&gt;cd &lt;/span&gt;kubernetes-examples/springboot-k8s-configmap-reload-example&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;Now add configmap named “k8s-live-reload-configmap” to kubernetes&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-shell&quot; data-lang=&quot;shell&quot;&gt;kubectl apply &lt;span class=&quot;nt&quot;&gt;-f&lt;/span&gt; src/k8s/config-map.yml&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;Switch to kubernetes docker daemon in active shell to make Kubernetes reach application image. Run the command below, then run the last command in the output.&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-shell&quot; data-lang=&quot;shell&quot;&gt;minikube docker-env&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;Build application image&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-shell&quot; data-lang=&quot;shell&quot;&gt;mvn clean &lt;span class=&quot;nb&quot;&gt;install &lt;/span&gt;spring-boot:build-image&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;Deployment and service&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-shell&quot; data-lang=&quot;shell&quot;&gt;kubectl create deployment liveconfig-demo &lt;span class=&quot;nt&quot;&gt;--image&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;springboot-configmap-livereload-example:0.0.1-SNAPSHOT
+kubectl create service clusterip liveconfig-demo &lt;span class=&quot;nt&quot;&gt;--tcp&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;8080:8080&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;&lt;br /&gt;&lt;b&gt;Test&lt;/b&gt;&lt;br /&gt;&lt;/p&gt;
+
+&lt;p&gt;Now see config before it has changed
+Deployment and service&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-shell&quot; data-lang=&quot;shell&quot;&gt;kubectl get service liveconfig-demo &lt;span class=&quot;c&quot;&gt;#copy CLUSTER-IP returned from this command&lt;/span&gt;
+minikube ssh
+curl http://CLUSTER-IP:8080/liveconfigtest&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;It should return oldvalue. Now edit config map through command below or through minikube dashboard&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-shell&quot; data-lang=&quot;shell&quot;&gt;kubectl edit configmap k8s-live-reload-configmap&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;After editing configmap, recheck application&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-shell&quot; data-lang=&quot;shell&quot;&gt;minikube ssh
+curl http://CLUSTER-IP:8080/liveconfigtest&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;It returns new value.&lt;/p&gt;</content><author><name></name></author><category term="article" /><summary type="html">In Kubernetes, configmap is used for keeping properties for an application. Once Spring applications required restart just due to change in properties file to take effect. Now in cloud with the help of fabric8 Kubernetes client, restart is not required anymore. We can reflect changes in configuration to Spring Boot live without downtime.</summary></entry><entry><title type="html">Building custom Openshift S2I Builder image with Java 11,13,14</title><link href="http://localhost:4000/article/2020/09/08/custom-s2i-builderimage-several-jvm.html" rel="alternate" type="text/html" title="Building custom Openshift S2I Builder image with Java 11,13,14" /><published>2020-09-08T03:56:47+03:00</published><updated>2020-09-08T03:56:47+03:00</updated><id>http://localhost:4000/article/2020/09/08/custom-s2i-builderimage-several-jvm</id><content type="html" xml:base="http://localhost:4000/article/2020/09/08/custom-s2i-builderimage-several-jvm.html">&lt;p&gt;In the age of containers and Kubernetes, applications needed to be configured with Dockerfiles and YAMLs. That can be another workload for developers and devops.
 Openshift provide a tool known as source-to-image (S2I) in order to simplify image creation from application sources. No additional configuration files are needed in this process.
 It takes application source and produces a runnable app in Openshift image registry or in external image registry. Then runs this image in a container. Let’s have a look at the command below.&lt;/p&gt;
 
@@ -19,7 +116,7 @@ Then you can produce your own builder image.&lt;/p&gt;
 build pod runs sti-build container&lt;/p&gt;
 
 &lt;ul&gt;
-  &lt;li&gt;pulls image openjdk-11-rhel7 then runs a container (if incremetal build is specified, pulls application image build from openjdk-11-rhel7 )&lt;/li&gt;
+  &lt;li&gt;pulls image openjdk-11-rhel7 then runs a container (if incremental build is specified, pulls application image which was built from openjdk-11-rhel7 )&lt;/li&gt;
   &lt;li&gt;application source was cloned with init container and assemble script runs /usr/local/s2i/assemble to compile, build and package your application.&lt;/li&gt;
   &lt;li&gt;
     &lt;p&gt;commits new application image (s2i-springboot-sample-1) to image registry&lt;/p&gt;
@@ -36,9 +133,9 @@ build pod runs sti-build container&lt;/p&gt;
 &lt;p&gt;This guilde is to show you how you make changes in a builder image: &lt;a class=&quot;text-accent&quot; href=&quot;https://github.com/gungor/s2i-builder-image&quot;&gt;https://github.com/gungor/s2i-builder-image&lt;/a&gt; .
 You can also setup any environment for any programming language. 
 I used OpenJDK 14 with OpenJ9 and maven 3.6.3. 
-Openshift &lt;a class=&quot;text-accent&quot; href=&quot;https://github.com/jboss-openshift/cct_module&quot;&gt;https://github.com/jboss-openshift/cct_module&lt;/a&gt; has many scripts helping builder image. assemble, run, save-artifacts files and configuration files can be found there.
-I made minimum changes to referencing openjdk-11-rhel7 image. Because several configuration files exists in cct_module and they use Openshift specific environment variables.
-Jvm start parameters adjusted by scripts in cct_module.
+Openshift &lt;a class=&quot;text-accent&quot; href=&quot;https://github.com/jboss-openshift/cct_module&quot;&gt;cct_module&lt;/a&gt; has many scripts helping builder image. assemble, run, save-artifacts files and configuration files can be found there.
+I made minimum changes referencing openjdk-11-rhel7 image. Because several configuration files exists in cct_module and they use Openshift specific environment variables.
+Jvm start parameters adjusted by additional scripts in cct_module.
 Keeping them is useful. Dockerfile can be simplified though, since it contains several redundant files.&lt;/p&gt;
 
 &lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-shell&quot; data-lang=&quot;shell&quot;&gt;&lt;span class=&quot;c&quot;&gt;# install maven&lt;/span&gt;
@@ -61,22 +158,20 @@ RUN curl &lt;span class=&quot;nt&quot;&gt;-o&lt;/span&gt; /tmp/tools/jdk.tar.gz 
 ENV &lt;span class=&quot;nv&quot;&gt;PATH&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;/usr/lib/jvm/bin:&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;${&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;PATH&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;
 ENV &lt;span class=&quot;nv&quot;&gt;JAVA_HOME&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;/usr/lib/jvm&quot;&lt;/span&gt; &lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
 
-&lt;p&gt;Changes I made&lt;/p&gt;
+&lt;p&gt;Changes I made seen above&lt;/p&gt;
 &lt;ul&gt;
   &lt;li&gt;maven setup&lt;/li&gt;
   &lt;li&gt;jdk setup&lt;/li&gt;
-  &lt;li&gt;changes to run script (enable-maven command discarded)&lt;/li&gt;
 &lt;/ul&gt;
 
 &lt;p&gt;&lt;br /&gt;&lt;b&gt;Minimum requirements for Builder Image&lt;/b&gt;&lt;/p&gt;
 &lt;ul&gt;
-  &lt;li&gt;new user configuration. Can be seen here: https://github.com/jboss-openshift/cct_module/blob/master/jboss/container/user/configure.sh&lt;/li&gt;
   &lt;li&gt;assemble script in /usr/local/s2i&lt;/li&gt;
   &lt;li&gt;run script in /usr/local/s2i&lt;/li&gt;
 &lt;/ul&gt;
 
-&lt;p&gt;&lt;br /&gt;&lt;br /&gt;&lt;a class=&quot;text-accent&quot; href=&quot;https://github.com/gungor/s2i-builder-image&quot;&gt;https://github.com/gungor/s2i-builder-image&lt;/a&gt;&lt;br /&gt;
-Run build.sh, then you have a builder image in your docker registry. You can customize maven and jdk version in Dockerfile.&lt;/p&gt;
+&lt;p&gt;&lt;br /&gt;&lt;br /&gt;Dockerfile and all scripts are here: &lt;a class=&quot;text-accent&quot; href=&quot;https://github.com/gungor/s2i-builder-image&quot;&gt;https://github.com/gungor/s2i-builder-image&lt;/a&gt;&lt;br /&gt;&lt;br /&gt;
+Run &lt;a class=&quot;text-accent&quot; href=&quot;https://github.com/gungor/s2i-builder-image/blob/master/build.sh&quot;&gt;build.sh&lt;/a&gt;, then you have a builder image in your docker registry. You can customize maven and jdk version in Dockerfile.&lt;/p&gt;
 
 &lt;p&gt;This guide is to just give you an idea about how builder images work and produced. Production usage of this image is not recommended.&lt;/p&gt;</content><author><name></name></author><category term="article" /><summary type="html">In the age of containers and Kubernetes, applications needed to be configured with Dockerfiles and YAMLs. That can be another workload for developers and devops. Openshift provide a tool known as source-to-image (S2I) in order to simplify image creation from application sources. No additional configuration files are needed in this process. It takes application source and produces a runnable app in Openshift image registry or in external image registry. Then runs this image in a container. Let’s have a look at the command below.</summary></entry><entry><title type="html">Soap call with Spring WebFlux</title><link href="http://localhost:4000/article/2020/08/23/soap-call-with-spring-webflux.html" rel="alternate" type="text/html" title="Soap call with Spring WebFlux" /><published>2020-08-23T19:56:47+03:00</published><updated>2020-08-23T19:56:47+03:00</updated><id>http://localhost:4000/article/2020/08/23/soap-call-with-spring-webflux</id><content type="html" xml:base="http://localhost:4000/article/2020/08/23/soap-call-with-spring-webflux.html">&lt;p&gt;As reactive becoming more used by developers in order to get performance advantages, you will still need to deal with legacy systems.
 There are still many soap web services being used today. If you want to consume soap services with Spring Reactor WebFlux, here is the example.
@@ -84,7 +179,7 @@ There are still many soap web services being used today. If you want to consume 
 
 &lt;p&gt;If you can consume Rest services using Json, it is not a big deal consuming soap.
 Generated JAXB classes needs to be enclosed by Soap envelope. 
-Therefore you just need an encoder class. We don’t need a decoder class since default Jaxb2XmlDecoder class unmarshalls succesfully.
+Therefore we need an encoder class. We also need a decoder class in order to unmarshal received xml into desired JAXB object.
 Below is the encode method of Jaxb2SoapEncoder class which you can find in the Git repository. I have modifed Jaxb2XmlEncoder minimally to make a soap envelope
 from the JAXB object. JAXB classes are generated by jaxb2-maven-plugin of org.codehaus.mojo.&lt;/p&gt;
 
@@ -128,7 +223,47 @@ from the JAXB object. JAXB classes are generated by jaxb2-maven-plugin of org.co
         &lt;span class=&quot;o&quot;&gt;}).&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;flux&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;();&lt;/span&gt;
     &lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
 
-&lt;p&gt;Jaxb2SoapEncoder class must be added to WebClient config as below.&lt;/p&gt;
+&lt;p&gt;With Jaxb2SoapEncoder, we can handle how request is sent through webflux.&lt;/p&gt;
+
+&lt;p&gt;Below is decode method of Jaxb2SoapDecoder.&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-java&quot; data-lang=&quot;java&quot;&gt;&lt;span class=&quot;nd&quot;&gt;@Override&lt;/span&gt;
+    &lt;span class=&quot;nd&quot;&gt;@SuppressWarnings&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;({&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;rawtypes&quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;unchecked&quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;cast&quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;})&lt;/span&gt;  &lt;span class=&quot;c1&quot;&gt;// XMLEventReader is Iterator&amp;lt;Object&amp;gt; on JDK 9&lt;/span&gt;
+    &lt;span class=&quot;kd&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;Object&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;decode&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nc&quot;&gt;DataBuffer&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;dataBuffer&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;ResolvableType&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;targetType&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt;
+                         &lt;span class=&quot;nd&quot;&gt;@Nullable&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;MimeType&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;mimeType&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nd&quot;&gt;@Nullable&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;Map&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;nc&quot;&gt;String&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;Object&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;hints&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;kd&quot;&gt;throws&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;DecodingException&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
+
+        &lt;span class=&quot;k&quot;&gt;try&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
+            &lt;span class=&quot;nc&quot;&gt;DefaultStrategiesHelper&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;helper&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;DefaultStrategiesHelper&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nc&quot;&gt;WebServiceTemplate&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;class&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;);&lt;/span&gt;
+            &lt;span class=&quot;nc&quot;&gt;WebServiceMessageFactory&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;messageFactory&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;helper&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;getDefaultStrategy&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nc&quot;&gt;WebServiceMessageFactory&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;class&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;);&lt;/span&gt;
+            &lt;span class=&quot;nc&quot;&gt;WebServiceMessage&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;message&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;messageFactory&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;createWebServiceMessage&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;dataBuffer&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;asInputStream&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;);&lt;/span&gt;
+            &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;unmarshal&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;message&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;targetType&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;toClass&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;());&lt;/span&gt;
+        &lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
+        &lt;span class=&quot;k&quot;&gt;catch&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nc&quot;&gt;Throwable&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ex&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
+            &lt;span class=&quot;n&quot;&gt;ex&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;ex&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;getCause&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;instanceof&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;XMLStreamException&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;?&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ex&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;getCause&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ex&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;);&lt;/span&gt;
+            &lt;span class=&quot;k&quot;&gt;throw&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;Exceptions&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;propagate&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;ex&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;);&lt;/span&gt;
+        &lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
+        &lt;span class=&quot;k&quot;&gt;finally&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
+            &lt;span class=&quot;nc&quot;&gt;DataBufferUtils&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;release&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;dataBuffer&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;);&lt;/span&gt;
+        &lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
+    &lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
+
+    &lt;span class=&quot;kd&quot;&gt;private&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;Object&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;unmarshal&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nc&quot;&gt;WebServiceMessage&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;message&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;Class&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;?&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;outputClass&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
+        &lt;span class=&quot;k&quot;&gt;try&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
+            &lt;span class=&quot;nc&quot;&gt;Unmarshaller&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;unmarshaller&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;initUnmarshaller&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;outputClass&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;);&lt;/span&gt;
+            &lt;span class=&quot;nc&quot;&gt;JAXBElement&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;?&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;jaxbElement&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;unmarshaller&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;unmarshal&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;message&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;getPayloadSource&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(),&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;outputClass&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;);&lt;/span&gt;
+            &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;jaxbElement&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;getValue&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;();&lt;/span&gt;
+        &lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
+        &lt;span class=&quot;k&quot;&gt;catch&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nc&quot;&gt;UnmarshalException&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ex&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
+            &lt;span class=&quot;k&quot;&gt;throw&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;DecodingException&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;Could not unmarshal XML to &quot;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;outputClass&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ex&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;);&lt;/span&gt;
+        &lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
+        &lt;span class=&quot;k&quot;&gt;catch&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nc&quot;&gt;JAXBException&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ex&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
+            &lt;span class=&quot;k&quot;&gt;throw&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;CodecException&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;Invalid JAXB configuration&quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ex&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;);&lt;/span&gt;
+        &lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
+    &lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;Jaxb2SoapDecoder helps in casting to expected object from before it returns to webflux.&lt;/p&gt;
+
+&lt;p&gt;Jaxb2SoapEncoder and Jaxb2SoapDecoder classes must be added to WebClient config as below.&lt;/p&gt;
 
 &lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-java&quot; data-lang=&quot;java&quot;&gt;    &lt;span class=&quot;nd&quot;&gt;@Bean&lt;/span&gt;
     &lt;span class=&quot;kd&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;WebClient&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;webClient&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(){&lt;/span&gt;
@@ -142,8 +277,10 @@ from the JAXB object. JAXB classes are generated by jaxb2-maven-plugin of org.co
                 &lt;span class=&quot;o&quot;&gt;});&lt;/span&gt;
 
         &lt;span class=&quot;nc&quot;&gt;ExchangeStrategies&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;exchangeStrategies&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;ExchangeStrategies&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;builder&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;().&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;codecs&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;clientCodecConfigurer&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
-            &lt;span class=&quot;n&quot;&gt;clientCodecConfigurer&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;customCodecs&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;().&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;encoder&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;Jaxb2SoapEncoder&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;());&lt;/span&gt;
+            &lt;span class=&quot;n&quot;&gt;clientCodecConfigurer&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;customCodecs&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;().&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;register&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;Jaxb2SoapEncoder&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;());&lt;/span&gt;
+            &lt;span class=&quot;n&quot;&gt;clientCodecConfigurer&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;customCodecs&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;().&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;register&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;Jaxb2SoapDecoder&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;());&lt;/span&gt;
         &lt;span class=&quot;o&quot;&gt;}).&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;build&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;();&lt;/span&gt;
+
 
         &lt;span class=&quot;nc&quot;&gt;WebClient&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;webClient&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;WebClient&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;builder&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;()&lt;/span&gt;
                 &lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;clientConnector&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;ReactorClientHttpConnector&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nc&quot;&gt;HttpClient&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;from&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;tcpClient&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;).&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;wiretap&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kc&quot;&gt;true&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)))&lt;/span&gt;
