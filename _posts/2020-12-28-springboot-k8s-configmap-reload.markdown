@@ -20,7 +20,8 @@ Above you can see Websocket is used between Spring Boot and Kubernetes API Serve
 If kube-proxy does not allow WebSocket then API Server is polled by HttpClient.
 
 In Spring side, bootstrap.yaml reload mode and configmap name given. I deliberately disabled actuator endpoints, because most examples include actuator endpoints, however it is not required because fabric8-client refreshes bean internally.
-In pom.xml however actuator dependencies needed since fabric8-config depends on actuator configuration classes.
+In pom.xml however actuator dependencies needed since fabric8-config depends on actuator configuration classes. 
+<a class="text-accent" href="https://github.com/gungor/springboot-k8s-configmap-reload-example">See example</a>
 {% highlight yml %}
 spring:
   application:
