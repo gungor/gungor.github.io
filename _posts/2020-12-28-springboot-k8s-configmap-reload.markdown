@@ -16,7 +16,7 @@ How events arrive Spring Boot? Does Kubernetes aware of our Spring Boot app? No.
 ![configmap-diagram](/assets/configmap-diagram.png)
 <br/>
  
-Above you can see Websocket is used between Spring Boot and Kubernetes API Server. Assuming we are using namespace "default" is this example, changes to response in this address reflected to KubernetesClient https://{api_server_clusterip}/api/v1/namespaces/default/configmaps/k8s-live-reload-configmap . 
+Above you can see Websocket is used between Spring Boot and Kubernetes API Server. Assuming we are using namespace "default" is this example, changes to response in this address reflected to KubernetesClient <b>https://{api_server_clusterip}/api/v1/namespaces/default/configmaps/k8s-live-reload-configmap</b> . 
 If kube-proxy does not allow WebSocket then API Server is polled by HttpClient.
 
 In Spring side, bootstrap.yaml reload mode and configmap name given. I deliberately disabled actuator endpoints, because most examples include actuator endpoints, however it is not required because fabric8-client refreshes bean internally.
@@ -69,8 +69,8 @@ kubectl create rolebinding default-sa-view --clusterrole=view --serviceaccount=d
 
 Get example project
 {% highlight shell %}
-git clone https://github.com/gungor/kubernetes-examples.git
-cd kubernetes-examples/springboot-k8s-configmap-reload-example
+git clone https://github.com/gungor/springboot-k8s-configmap-reload-example.git
+cd springboot-k8s-configmap-reload-example
 {% endhighlight %}
 
 Now add configmap named "k8s-live-reload-configmap" to kubernetes
