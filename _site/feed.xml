@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.0.1">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" /><updated>2020-12-28T02:38:35+03:00</updated><id>http://localhost:4000/feed.xml</id><title type="html">Developer Discoveries</title><subtitle></subtitle><entry><title type="html">Configmap Reload with Spring Boot in Kubernetes</title><link href="http://localhost:4000/article/2020/12/28/springboot-k8s-configmap-reload.html" rel="alternate" type="text/html" title="Configmap Reload with Spring Boot in Kubernetes" /><published>2020-12-28T01:38:27+03:00</published><updated>2020-12-28T01:38:27+03:00</updated><id>http://localhost:4000/article/2020/12/28/springboot-k8s-configmap-reload</id><content type="html" xml:base="http://localhost:4000/article/2020/12/28/springboot-k8s-configmap-reload.html">&lt;p&gt;In Kubernetes, configmap is used for keeping properties for an application. Once Spring applications required restart just due to change in properties file to take effect.
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.0.1">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" /><updated>2021-01-02T22:57:44+03:00</updated><id>http://localhost:4000/feed.xml</id><title type="html">Developer Discoveries</title><subtitle></subtitle><entry><title type="html">Configmap Reload with Spring Boot in Kubernetes</title><link href="http://localhost:4000/article/2020/12/28/springboot-k8s-configmap-reload.html" rel="alternate" type="text/html" title="Configmap Reload with Spring Boot in Kubernetes" /><published>2020-12-28T01:38:27+03:00</published><updated>2020-12-28T01:38:27+03:00</updated><id>http://localhost:4000/article/2020/12/28/springboot-k8s-configmap-reload</id><content type="html" xml:base="http://localhost:4000/article/2020/12/28/springboot-k8s-configmap-reload.html">&lt;p&gt;In Kubernetes, configmap is used for keeping properties for an application. Once Spring applications required restart just due to change in properties file to take effect.
 Now in cloud with the help of fabric8 Kubernetes client, restart is not required anymore. We can reflect changes in configuration to Spring Boot live without downtime.&lt;/p&gt;
 
 &lt;p&gt;There are two reload modes: polling and event. Polling as the name implies polls Kubernetes API periodically. Event is more effective since it takes effect when configmap changed. 
@@ -9,11 +9,12 @@ We will cover event mode reload in this post.&lt;/p&gt;
 &lt;p&gt;&lt;img src=&quot;/assets/configmap-diagram.png&quot; alt=&quot;configmap-diagram&quot; /&gt;
 &lt;br /&gt;&lt;/p&gt;
 
-&lt;p&gt;Above you can see Websocket is used between Spring Boot and Kubernetes API Server. Assuming we are using namespace “default” is this example, changes to response in this address reflected to KubernetesClient https://{api_server_clusterip}/api/v1/namespaces/default/configmaps/k8s-live-reload-configmap . 
+&lt;p&gt;Above you can see Websocket is used between Spring Boot and Kubernetes API Server. Assuming we are using namespace “default” in this example, changes to response in this address reflected to KubernetesClient &lt;b&gt;https://{api_server_clusterip}/api/v1/namespaces/default/configmaps/k8s-live-reload-configmap&lt;/b&gt; . 
 If kube-proxy does not allow WebSocket then API Server is polled by HttpClient.&lt;/p&gt;
 
 &lt;p&gt;In Spring side, bootstrap.yaml reload mode and configmap name given. I deliberately disabled actuator endpoints, because most examples include actuator endpoints, however it is not required because fabric8-client refreshes bean internally.
-In pom.xml however actuator dependencies needed since fabric8-config depends on actuator configuration classes.&lt;/p&gt;
+In pom.xml however actuator dependencies needed since fabric8-config depends on actuator configuration classes. 
+&lt;a class=&quot;text-accent&quot; href=&quot;https://github.com/gungor/springboot-k8s-configmap-reload-example&quot;&gt;See example&lt;/a&gt;&lt;/p&gt;
 
 &lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-yml&quot; data-lang=&quot;yml&quot;&gt;&lt;span class=&quot;na&quot;&gt;spring&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
   &lt;span class=&quot;na&quot;&gt;application&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
@@ -57,8 +58,8 @@ You must have docker running.&lt;/p&gt;
 
 &lt;p&gt;Get example project&lt;/p&gt;
 
-&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-shell&quot; data-lang=&quot;shell&quot;&gt;git clone https://github.com/gungor/kubernetes-examples.git
-&lt;span class=&quot;nb&quot;&gt;cd &lt;/span&gt;kubernetes-examples/springboot-k8s-configmap-reload-example&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-shell&quot; data-lang=&quot;shell&quot;&gt;git clone https://github.com/gungor/springboot-k8s-configmap-reload-example.git
+&lt;span class=&quot;nb&quot;&gt;cd &lt;/span&gt;springboot-k8s-configmap-reload-example&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
 
 &lt;p&gt;Now add configmap named “k8s-live-reload-configmap” to kubernetes&lt;/p&gt;
 
