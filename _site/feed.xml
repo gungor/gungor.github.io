@@ -1,4 +1,227 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.0.1">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" /><updated>2021-01-02T22:57:44+03:00</updated><id>http://localhost:4000/feed.xml</id><title type="html">Developer Discoveries</title><subtitle></subtitle><entry><title type="html">Configmap Reload with Spring Boot in Kubernetes</title><link href="http://localhost:4000/article/2020/12/28/springboot-k8s-configmap-reload.html" rel="alternate" type="text/html" title="Configmap Reload with Spring Boot in Kubernetes" /><published>2020-12-28T01:38:27+03:00</published><updated>2020-12-28T01:38:27+03:00</updated><id>http://localhost:4000/article/2020/12/28/springboot-k8s-configmap-reload</id><content type="html" xml:base="http://localhost:4000/article/2020/12/28/springboot-k8s-configmap-reload.html">&lt;p&gt;In Kubernetes, configmap is used for keeping properties for an application. Once Spring applications required restart just due to change in properties file to take effect.
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.0.1">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" /><updated>2021-05-04T18:09:51+03:00</updated><id>http://localhost:4000/feed.xml</id><title type="html">Developer Discoveries</title><subtitle></subtitle><entry><title type="html">TDD: Bottom-up vs Top-down</title><link href="http://localhost:4000/article/2021/05/03/tdd-outsidein-vs-insideout.html" rel="alternate" type="text/html" title="TDD: Bottom-up vs Top-down" /><published>2021-05-03T01:38:27+03:00</published><updated>2021-05-03T01:38:27+03:00</updated><id>http://localhost:4000/article/2021/05/03/tdd-outsidein-vs-insideout</id><content type="html" xml:base="http://localhost:4000/article/2021/05/03/tdd-outsidein-vs-insideout.html">&lt;p&gt;TDD is an approach used in industry in many ways and useful. In this post, two ways of TDD will be reviewed. First is named as insideout or bottom-up which starts development with lowest level components to highest.
+Second is outsidein or top-down which starts with highest level components to lowest level. It is difficult to find a good example about TDD. Besides it is difficult to follow from video or article. I think all separate red and green phases can be followed. I want to present two examples for these two approaches.
+As a testing suite Spring Test is used. There are lots of details of Spring Test, however it is out of this context. I will mention some critical points using Spring Test. 
+I will show two examples in Springboot. Below is the diagram comparing two approaches. Development order is shown with arrows.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/topdown-bottomup.png&quot; alt=&quot;topdown-bottomup&quot; /&gt;
+&lt;br /&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;br /&gt;&lt;b&gt;TDD: Short Introduction&lt;/b&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;Write test before production code&lt;/li&gt;
+  &lt;li&gt;First test must fail (RED)&lt;/li&gt;
+  &lt;li&gt;Write simplest code passing the test (GREEN)&lt;/li&gt;
+  &lt;li&gt;Refactor&lt;/li&gt;
+  &lt;li&gt;Don’t write any test before passing existing ones&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;&lt;br /&gt;&lt;b&gt;Requirements Example&lt;/b&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;User can save a new employee&lt;/li&gt;
+  &lt;li&gt;User can update an existing employee&lt;/li&gt;
+  &lt;li&gt;User can get an employee by id&lt;/li&gt;
+  &lt;li&gt;User can get an employee by name&lt;/li&gt;
+  &lt;li&gt;User gets bad request for operations update and get, if given id or name does not exist&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;&lt;br /&gt;&lt;b&gt;First Approach: Bottom-up&lt;/b&gt;&lt;br /&gt;&lt;/p&gt;
+
+&lt;p&gt;When Kent Beck first presented TDD, it was bottom-up. This approach is classissist way. There are no mocks or stubs. Starting with lowest components Red-Green-Refactor cycle runs.
+I think this is more robust way since developer test highest level components such as controllers with exactly working components not with stubs. 
+Another advantage is that several developers working on same code can reuse existing tests.&lt;/p&gt;
+
+&lt;p&gt;As shown below, red lines refer to the version which does not pass test, however green lines refer to the version passing test
+Having committed all red and green phases in cycles, you can follow the code:
+&lt;a class=&quot;text-accent&quot; href=&quot;https://github.com/gungor/tdd-insideout-example&quot;&gt;https://github.com/gungor/tdd-insideout-example&lt;/a&gt;&lt;br /&gt;&lt;/p&gt;
+
+&lt;table&gt;
+	
+	&lt;tbody&gt;
+		&lt;tr&gt;
+			&lt;td class=&quot;tdd-red&quot;&gt;&lt;a href=&quot;https://github.com/gungor/tdd-insideout-example/commit/12ff61865dbc3596dc1f76507987558cdc9dc6fd&quot;&gt;Cycle 1: Repository: search by name&lt;/a&gt;&lt;/td&gt;
+		&lt;/tr&gt;
+		&lt;tr&gt;
+			&lt;td class=&quot;tdd-green&quot;&gt;&lt;a href=&quot;https://github.com/gungor/tdd-insideout-example/commit/b24460c10d8fa2831f07da26c7e9d9cddc65f21f&quot;&gt;Cycle 1: Repository: search by name&lt;/a&gt;&lt;/td&gt;
+		&lt;/tr&gt;
+		&lt;tr&gt;
+			&lt;td class=&quot;tdd-red&quot;&gt;&lt;a href=&quot;https://github.com/gungor/tdd-outsidein-example/commit/3b7f3f11e75f73e608f893be35ac57eb2c612726&quot;&gt;Cycle 2: Service: save employee&lt;/a&gt;&lt;/td&gt;
+		&lt;/tr&gt;
+		&lt;tr&gt;
+			&lt;td class=&quot;tdd-green&quot;&gt;&lt;a href=&quot;https://github.com/gungor/tdd-outsidein-example/commit/547566e56975082c5e34441eaa72ba9c8f5c28a4&quot;&gt;Cycle 2: Service: save employee&lt;/a&gt;&lt;/td&gt;
+		&lt;/tr&gt;
+		&lt;tr&gt;
+			&lt;td class=&quot;tdd-red&quot;&gt;&lt;a href=&quot;https://github.com/gungor/tdd-insideout-example/commit/f52e95c5b15eff504e592f1980769630e112b3b1&quot;&gt;Cycle 3: Service: update employee&lt;/a&gt;&lt;/td&gt;
+		&lt;/tr&gt;
+		&lt;tr&gt;
+			&lt;td class=&quot;tdd-green&quot;&gt;&lt;a href=&quot;https://github.com/gungor/tdd-insideout-example/commit/b9793976af527d42e7fd724002b8a41eada7e4ff&quot;&gt;Cycle 3: Service: update employee&lt;/a&gt;&lt;/td&gt;
+		&lt;/tr&gt;
+		&lt;tr&gt;
+			&lt;td class=&quot;tdd-red&quot;&gt;&lt;a href=&quot;https://github.com/gungor/tdd-insideout-example/commit/d7c4833a87f465f26797155f99e489bdef7ea32f&quot;&gt;Cycle 4: Service: update employee throws exception when id not exist&lt;/a&gt;&lt;/td&gt;
+		&lt;/tr&gt;
+		&lt;tr&gt;
+			&lt;td class=&quot;tdd-green&quot;&gt;&lt;a href=&quot;https://github.com/gungor/tdd-insideout-example/commit/a6514eec42761f3d05dce2c60a80e8b1e80610a4&quot;&gt;Cycle 4: Service: update employee throws exception when id not exist&lt;/a&gt;&lt;/td&gt;
+		&lt;/tr&gt;
+		&lt;tr&gt;
+			&lt;td class=&quot;tdd-red&quot;&gt;&lt;a href=&quot;https://github.com/gungor/tdd-insideout-example/commit/c6390f45389955a7dbd2cf1246e879d1ac2127ab&quot;&gt;Cycle 5: Service: get employee&lt;/a&gt;&lt;/td&gt;
+		&lt;/tr&gt;
+		&lt;tr&gt;
+			&lt;td class=&quot;tdd-green&quot;&gt;&lt;a href=&quot;https://github.com/gungor/tdd-insideout-example/commit/2dda5c36d4350158dfa2e6b3d54650d26bb472e9&quot;&gt;Cycle 5: Service: get employee&lt;/a&gt;&lt;/td&gt;
+		&lt;/tr&gt;
+		&lt;tr&gt;
+			&lt;td class=&quot;tdd-red&quot;&gt;&lt;a href=&quot;https://github.com/gungor/tdd-insideout-example/commit/21999d13204bb9e5aaac26d3be7ddadbe4529397&quot;&gt;Cycle 6: Service: get employee throws exception when id not exist&lt;/a&gt;&lt;/td&gt;
+		&lt;/tr&gt;
+		&lt;tr&gt;
+			&lt;td class=&quot;tdd-green&quot;&gt;&lt;a href=&quot;https://github.com/gungor/tdd-insideout-example/commit/d3beb4d5699f74a457c75eddc8a96555c0861402&quot;&gt;Cycle 6: Service: get employee throws exception when id not exist&lt;/a&gt;&lt;/td&gt;
+		&lt;/tr&gt;
+		&lt;tr&gt;
+			&lt;td class=&quot;tdd-red&quot;&gt;&lt;a href=&quot;https://github.com/gungor/tdd-insideout-example/commit/2166ecbfa72331db70ca3a7b36366545dbcfb642&quot;&gt;Cycle 7: Service: get employee by name&lt;/a&gt;&lt;/td&gt;
+		&lt;/tr&gt;
+		&lt;tr&gt;
+			&lt;td class=&quot;tdd-green&quot;&gt;&lt;a href=&quot;https://github.com/gungor/tdd-insideout-example/commit/264d3d6db0cc03dc6520dc745fa2d6eecc1cbc4a&quot;&gt;Cycle 7: Service: get employee by name&lt;/a&gt;&lt;/td&gt;
+		&lt;/tr&gt;
+		&lt;tr&gt;
+			&lt;td class=&quot;tdd-red&quot;&gt;&lt;a href=&quot;https://github.com/gungor/tdd-insideout-example/commit/bd21b419d828fb3903f87ade6115edbfb1fc4b69&quot;&gt;Cycle 8: Service: get employee by name throws exception when employee not found by name&lt;/a&gt;&lt;/td&gt;
+		&lt;/tr&gt;
+		&lt;tr&gt;
+			&lt;td class=&quot;tdd-green&quot;&gt;&lt;a href=&quot;https://github.com/gungor/tdd-insideout-example/commit/460b7efd9e5660aa09c150295a85bfe986359a07&quot;&gt;Cycle 8: Service: get employee by name throws exception when employee not found by name&lt;/a&gt;&lt;/td&gt;
+		&lt;/tr&gt;
+		&lt;tr&gt;
+			&lt;td class=&quot;tdd-red&quot;&gt;&lt;a href=&quot;https://github.com/gungor/tdd-insideout-example/commit/b3702c7875a05095d14c3ca406836a8398ea3fb9&quot;&gt;Cycle 9: Controller: save employee&lt;/a&gt;&lt;/td&gt;
+		&lt;/tr&gt;
+		&lt;tr&gt;
+			&lt;td class=&quot;tdd-green&quot;&gt;&lt;a href=&quot;https://github.com/gungor/tdd-insideout-example/commit/d890794712bf171b56d39c1c32efc78e113f488e&quot;&gt;Cycle 9: Controller: save employee&lt;/a&gt;&lt;/td&gt;
+		&lt;/tr&gt;
+		&lt;tr&gt;
+			&lt;td class=&quot;tdd-red&quot;&gt;&lt;a href=&quot;https://github.com/gungor/tdd-insideout-example/commit/00ba1419dd20becdb8524162484b9a84dfc5518d&quot;&gt;Cycle 10: Controller: update employee&lt;/a&gt;&lt;/td&gt;
+		&lt;/tr&gt;
+		&lt;tr&gt;
+			&lt;td class=&quot;tdd-green&quot;&gt;&lt;a href=&quot;https://github.com/gungor/tdd-insideout-example/commit/56cbff6950065c8e45ee800e5c2bbfaf09adc0c2&quot;&gt;Cycle 10: Controller: update employee&lt;/a&gt;&lt;/td&gt;
+		&lt;/tr&gt;
+		&lt;tr&gt;
+			&lt;td class=&quot;tdd-red&quot;&gt;&lt;a href=&quot;https://github.com/gungor/tdd-insideout-example/commit/d489d07f9545c92c9eaa81d99c8de375ad8db30e&quot;&gt;Cycle 11: Controller: get employee by id&lt;/a&gt;&lt;/td&gt;
+		&lt;/tr&gt;
+		&lt;tr&gt;
+			&lt;td class=&quot;tdd-green&quot;&gt;&lt;a href=&quot;https://github.com/gungor/tdd-insideout-example/commit/30d7b6a1314e5b1bed253a0b1d3fbb7d36041d2d&quot;&gt;Cycle 11: Controller: get employee by id&lt;/a&gt;&lt;/td&gt;
+		&lt;/tr&gt;
+		&lt;tr&gt;
+			&lt;td class=&quot;tdd-red&quot;&gt;&lt;a href=&quot;https://github.com/gungor/tdd-insideout-example/commit/511306050fa1214a586e0bf4dd87084d3b39e082&quot;&gt;Cycle 12: Controller: get employee by name&lt;/a&gt;&lt;/td&gt;
+		&lt;/tr&gt;
+		&lt;tr&gt;
+			&lt;td class=&quot;tdd-green&quot;&gt;&lt;a href=&quot;https://github.com/gungor/tdd-insideout-example/commit/ba5d00458a089eeb1702809c59038b884744a7ca&quot;&gt;Cycle 12: Controller: get employee by name&lt;/a&gt;&lt;/td&gt;
+		&lt;/tr&gt;
+		&lt;tr&gt;
+			&lt;td class=&quot;tdd-red&quot;&gt;&lt;a href=&quot;https://github.com/gungor/tdd-insideout-example/commit/72bf93286a7d49169443c115994c3cbea16da610&quot;&gt;Cycle 13: Controller: return bad request when employee not found&lt;/a&gt;&lt;/td&gt;
+		&lt;/tr&gt;
+		&lt;tr&gt;
+			&lt;td class=&quot;tdd-green&quot;&gt;&lt;a href=&quot;https://github.com/gungor/tdd-insideout-example/commit/c75595cef272737ed57e24248abcdf88ea9b1aad&quot;&gt;Cycle 13: Controller: return bad request when employee not found&lt;/a&gt;&lt;/td&gt;
+		&lt;/tr&gt;
+	&lt;/tbody&gt;
+&lt;/table&gt;
+
+&lt;p&gt;&lt;br /&gt;&lt;b&gt;Second Approach: Top-down&lt;/b&gt;&lt;br /&gt;
+Mockist or outsidein or Top-down approach. It is believed to be started with this paper: &lt;a class=&quot;text-accent&quot; href=&quot;https://www2.ccs.neu.edu/research/demeter/related-work/extreme-programming/MockObjectsFinal.PDF&quot;&gt;Paper at XP&lt;/a&gt;&lt;br /&gt;
+Developer starts writing tests for highest level components first and mock dependent objects. That way there happens little test doubles contrary to classissist way therefore decreases refactoring cost.
+Another advantage is on the integration side. This approach emphasizes integration of higher level components prior to development of lower components. Thus it allows to design your solution better than classisist way.&lt;/p&gt;
+
+&lt;p&gt;As shown below, red lines refer to the version which does not pass test, however green lines refer to the version passing test
+Having committed all red and green phases in cycles, you can follow the code:
+&lt;a class=&quot;text-accent&quot; href=&quot;https://github.com/gungor/tdd-outsidein-example&quot;&gt;https://github.com/gungor/tdd-outsidein-example&lt;/a&gt;&lt;br /&gt;&lt;/p&gt;
+
+&lt;table&gt;
+	
+	&lt;tbody&gt;
+		&lt;tr&gt;
+			&lt;td class=&quot;tdd-red&quot;&gt;&lt;a href=&quot;https://github.com/gungor/tdd-outsidein-example/commit/d332e8124eae9dc2444a1662ff219283bdc75b14&quot;&gt;Cycle 1: Controller: save employee&lt;/a&gt;&lt;/td&gt;
+		&lt;/tr&gt;
+		&lt;tr&gt;
+			&lt;td class=&quot;tdd-green&quot;&gt;&lt;a href=&quot;https://github.com/gungor/tdd-outsidein-example/commit/b7f4e941bb5f6c2a547f2ba480623d10f5575a92&quot;&gt;Cycle 1: Controller: save employee&lt;/a&gt;&lt;/td&gt;
+		&lt;/tr&gt;
+		&lt;tr&gt;
+			&lt;td class=&quot;tdd-red&quot;&gt;&lt;a href=&quot;https://github.com/gungor/tdd-outsidein-example/commit/3b7f3f11e75f73e608f893be35ac57eb2c612726&quot;&gt;Cycle 2: Controller: update employee&lt;/a&gt;&lt;/td&gt;
+		&lt;/tr&gt;
+		&lt;tr&gt;
+			&lt;td class=&quot;tdd-green&quot;&gt;&lt;a href=&quot;https://github.com/gungor/tdd-outsidein-example/commit/547566e56975082c5e34441eaa72ba9c8f5c28a4&quot;&gt;Cycle 2: Controller: update employee&lt;/a&gt;&lt;/td&gt;
+		&lt;/tr&gt;
+		&lt;tr&gt;
+			&lt;td class=&quot;tdd-red&quot;&gt;&lt;a href=&quot;https://github.com/gungor/tdd-outsidein-example/commit/417292d24d4739ee544eea2a4f863cc14cd7f2ae&quot;&gt;Cycle 3: Controller: get employee by id&lt;/a&gt;&lt;/td&gt;
+		&lt;/tr&gt;
+		&lt;tr&gt;
+			&lt;td class=&quot;tdd-green&quot;&gt;&lt;a href=&quot;https://github.com/gungor/tdd-outsidein-example/commit/6b0d857b8b9bcc379ace97486c3c56f5a71a1171&quot;&gt;Cycle 3: Controller: get employee by id&lt;/a&gt;&lt;/td&gt;
+		&lt;/tr&gt;
+		&lt;tr&gt;
+			&lt;td class=&quot;tdd-red&quot;&gt;&lt;a href=&quot;https://github.com/gungor/tdd-outsidein-example/commit/5fdcea9e5b9044585a534b6e81c507a4c584a76f&quot;&gt;Cycle 4: Controller: get employee by name&lt;/a&gt;&lt;/td&gt;
+		&lt;/tr&gt;
+		&lt;tr&gt;
+			&lt;td class=&quot;tdd-green&quot;&gt;&lt;a href=&quot;https://github.com/gungor/tdd-outsidein-example/commit/2182532666c3bfa830817aa0038c39bf4a0899ee&quot;&gt;Cycle 4: Controller: get employee by name&lt;/a&gt;&lt;/td&gt;
+		&lt;/tr&gt;
+		&lt;tr&gt;
+			&lt;td class=&quot;tdd-red&quot;&gt;&lt;a href=&quot;https://github.com/gungor/tdd-outsidein-example/commit/3506432edc02023da7b0ead2aa2de46552cf769e&quot;&gt;Cycle 5: Controller: return bad request when employee not found&lt;/a&gt;&lt;/td&gt;
+		&lt;/tr&gt;
+		&lt;tr&gt;
+			&lt;td class=&quot;tdd-green&quot;&gt;&lt;a href=&quot;https://github.com/gungor/tdd-outsidein-example/commit/2d293f55637efcf86fd3071b994d322e5f2cb2a8&quot;&gt;Cycle 5: Controller: return bad request when employee not found&lt;/a&gt;&lt;/td&gt;
+		&lt;/tr&gt;
+		&lt;tr&gt;
+			&lt;td class=&quot;tdd-red&quot;&gt;&lt;a href=&quot;https://github.com/gungor/tdd-outsidein-example/commit/20a246899df620962968ee85d3d4b8520b554012&quot;&gt;Cycle 6: Service: save employee&lt;/a&gt;&lt;/td&gt;
+		&lt;/tr&gt;
+		&lt;tr&gt;
+			&lt;td class=&quot;tdd-green&quot;&gt;&lt;a href=&quot;https://github.com/gungor/tdd-outsidein-example/commit/fbb9e47e035438dca74981310e647e0f63234c4e&quot;&gt;Cycle 6: Service: save employee&lt;/a&gt;&lt;/td&gt;
+		&lt;/tr&gt;
+		&lt;tr&gt;
+			&lt;td class=&quot;tdd-red&quot;&gt;&lt;a href=&quot;https://github.com/gungor/tdd-outsidein-example/commit/453a10bf54c8db615cc58d16fa20635ada0e1cad&quot;&gt;Cycle 7: Service: update employee&lt;/a&gt;&lt;/td&gt;
+		&lt;/tr&gt;
+		&lt;tr&gt;
+			&lt;td class=&quot;tdd-green&quot;&gt;&lt;a href=&quot;https://github.com/gungor/tdd-outsidein-example/commit/6a416a6018e4ad6f308f88da1f1e5a26ecca5889&quot;&gt;Cycle 7: Service: update employee&lt;/a&gt;&lt;/td&gt;
+		&lt;/tr&gt;
+		&lt;tr&gt;
+			&lt;td class=&quot;tdd-red&quot;&gt;&lt;a href=&quot;https://github.com/gungor/tdd-outsidein-example/commit/90cea383c6deb26b7960cc8377b1d6600c9f6445&quot;&gt;Cycle 8: Service: update employee throws exception when id not exist&lt;/a&gt;&lt;/td&gt;
+		&lt;/tr&gt;
+		&lt;tr&gt;
+			&lt;td class=&quot;tdd-green&quot;&gt;&lt;a href=&quot;https://github.com/gungor/tdd-outsidein-example/commit/ed190a78f6a481aede3e225f7c85868f5886137b&quot;&gt;Cycle 8: Service: update employee throws exception when id not exist&lt;/a&gt;&lt;/td&gt;
+		&lt;/tr&gt;
+		&lt;tr&gt;
+			&lt;td class=&quot;tdd-red&quot;&gt;&lt;a href=&quot;https://github.com/gungor/tdd-outsidein-example/commit/e054245957fc4c71d981e7aa476d87ae15953702&quot;&gt;Cycle 9: Service: get employee&lt;/a&gt;&lt;/td&gt;
+		&lt;/tr&gt;
+		&lt;tr&gt;
+			&lt;td class=&quot;tdd-green&quot;&gt;&lt;a href=&quot;https://github.com/gungor/tdd-outsidein-example/commit/f380c3365f7eb8da61b3039226d0aec5b5b50dc5&quot;&gt;Cycle 9: Service: get employee&lt;/a&gt;&lt;/td&gt;
+		&lt;/tr&gt;
+		&lt;tr&gt;
+			&lt;td class=&quot;tdd-red&quot;&gt;&lt;a href=&quot;https://github.com/gungor/tdd-outsidein-example/commit/a1f0f7784afcfb6610e2ebae355aab948b6a7c3a&quot;&gt;Cycle 10: Service: get employee throws exception when id not exist&lt;/a&gt;&lt;/td&gt;
+		&lt;/tr&gt;
+		&lt;tr&gt;
+			&lt;td class=&quot;tdd-green&quot;&gt;&lt;a href=&quot;https://github.com/gungor/tdd-outsidein-example/commit/7bc6e585a460c0231dd5c6e8a72b843b7cc1b31f&quot;&gt;Cycle 10: Service: get employee throws exception when id not exist&lt;/a&gt;&lt;/td&gt;
+		&lt;/tr&gt;
+		&lt;tr&gt;
+			&lt;td class=&quot;tdd-red&quot;&gt;&lt;a href=&quot;https://github.com/gungor/tdd-outsidein-example/commit/cfe883a4cae129af5bc61d647bf2cee7257f5620&quot;&gt;Cycle 11: Service: get employee by name&lt;/a&gt;&lt;/td&gt;
+		&lt;/tr&gt;
+		&lt;tr&gt;
+			&lt;td class=&quot;tdd-green&quot;&gt;&lt;a href=&quot;https://github.com/gungor/tdd-outsidein-example/commit/6272474eb14630b0cf28c02acecd8e00833b56ad&quot;&gt;Cycle 11: Service: get employee by name&lt;/a&gt;&lt;/td&gt;
+		&lt;/tr&gt;
+		&lt;tr&gt;
+			&lt;td class=&quot;tdd-red&quot;&gt;&lt;a href=&quot;https://github.com/gungor/tdd-outsidein-example/commit/5e0438fbd75b834be5cc8b1e4991c56c2e8a0c5d&quot;&gt;Cycle 12: Service: get employee by name throws exception when employee not found by name&lt;/a&gt;&lt;/td&gt;
+		&lt;/tr&gt;
+		&lt;tr&gt;
+			&lt;td class=&quot;tdd-green&quot;&gt;&lt;a href=&quot;https://github.com/gungor/tdd-outsidein-example/commit/7522e1e31f4c1f5a81444f18d1e0cd81a417189f&quot;&gt;Cycle 12: Service: get employee by name throws exception when employee not found by name&lt;/a&gt;&lt;/td&gt;
+		&lt;/tr&gt;
+		&lt;tr&gt;
+			&lt;td class=&quot;tdd-red&quot;&gt;&lt;a href=&quot;https://github.com/gungor/tdd-outsidein-example/commit/2fad6a2539718d3d33766a58dacd60fefe5cd587&quot;&gt;Cycle 13: Repository: search by name&lt;/a&gt;&lt;/td&gt;
+		&lt;/tr&gt;
+		&lt;tr&gt;
+			&lt;td class=&quot;tdd-green&quot;&gt;&lt;a href=&quot;https://github.com/gungor/tdd-outsidein-example/commit/039d979c2a003f92ad4067825711c318a04efe62&quot;&gt;Cycle 13: Repository: search by name&lt;/a&gt;&lt;/td&gt;
+		&lt;/tr&gt;
+		
+	&lt;/tbody&gt;
+&lt;/table&gt;
+
+&lt;p&gt;&lt;br /&gt;&lt;b&gt;Notes on Spring Test&lt;/b&gt;&lt;br /&gt;&lt;br /&gt;
+Do not use @Transactional on test methods. It may cause false negatives. There is a good &lt;a class=&quot;text-accent&quot; href=&quot;https://medium.com/@henrickkakutalua/dont-use-transactional-in-tests-65b857f63a4a&quot;&gt;article&lt;/a&gt; about that 
+&lt;br /&gt;&lt;br /&gt;
+Use TestEntityManager instead of Repository classes when retrieving records in database in order to assert. Since Hibernate uses first level cache, CrudRepository or JpaRepository may return entities from cache. Since TestEntityManager operations are transactional, it ensures that result received from TestEntityManager fetched from database not from first level cache.
+&lt;br /&gt;&lt;br /&gt;
+Using TestEntityManager without @DataJpaTest requires transaction. You can use it inside TransactionTemplate.&lt;/p&gt;
+
+&lt;p&gt;&lt;br /&gt;&lt;b&gt;Notes on TDD&lt;/b&gt;&lt;br /&gt;&lt;br /&gt;
+Actually there is not a consensus on TDD. As you know there are classisists and mockists. There are also some authorities who does not think it brings benefit more than it costs. 
+I think TDD can provide benefits in many cases but it costs time. Benefits of using TDD with legacy systems is also questionable. You may think about pros and cons of TDD before starting your project.&lt;/p&gt;</content><author><name></name></author><category term="article" /><summary type="html">TDD is an approach used in industry in many ways and useful. In this post, two ways of TDD will be reviewed. First is named as insideout or bottom-up which starts development with lowest level components to highest. Second is outsidein or top-down which starts with highest level components to lowest level. It is difficult to find a good example about TDD. Besides it is difficult to follow from video or article. I think all separate red and green phases can be followed. I want to present two examples for these two approaches. As a testing suite Spring Test is used. There are lots of details of Spring Test, however it is out of this context. I will mention some critical points using Spring Test. I will show two examples in Springboot. Below is the diagram comparing two approaches. Development order is shown with arrows.</summary></entry><entry><title type="html">Configmap Reload with Spring Boot in Kubernetes</title><link href="http://localhost:4000/article/2020/12/28/springboot-k8s-configmap-reload.html" rel="alternate" type="text/html" title="Configmap Reload with Spring Boot in Kubernetes" /><published>2020-12-28T01:38:27+03:00</published><updated>2020-12-28T01:38:27+03:00</updated><id>http://localhost:4000/article/2020/12/28/springboot-k8s-configmap-reload</id><content type="html" xml:base="http://localhost:4000/article/2020/12/28/springboot-k8s-configmap-reload.html">&lt;p&gt;In Kubernetes, configmap is used for keeping properties for an application. Once Spring applications required restart just due to change in properties file to take effect.
 Now in cloud with the help of fabric8 Kubernetes client, restart is not required anymore. We can reflect changes in configuration to Spring Boot live without downtime.&lt;/p&gt;
 
 &lt;p&gt;There are two reload modes: polling and event. Polling as the name implies polls Kubernetes API periodically. Event is more effective since it takes effect when configmap changed. 
